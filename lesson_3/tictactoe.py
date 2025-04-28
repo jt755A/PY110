@@ -7,6 +7,7 @@ HUMAN_MARKER = 'X'
 COMPUTER_MARKER = 'O'
 GAMES_TO_WIN = 5
 CENTER_SQUARE = 5
+PLAYERS = ('Player', 'Computer')
 
 WINNING_LINES = [
         [1, 2, 3], [4, 5, 6], [7, 8, 9],  # rows
@@ -16,6 +17,9 @@ WINNING_LINES = [
 
 def prompt(message):
     print(f'==> {message}')
+
+def alternate_player(current_player):
+    return PLAYERS[abs(PLAYERS.index(current_player) - 1)]
 
 def display_board(board):
     os.system('clear')
@@ -57,6 +61,51 @@ def join_or(lst, delimiter=', ', join_word='or'):
     joined_nums += delimiter.join(str_lst[:-1])
     return f'{joined_nums} {join_word} {str_lst[-1]}'
            
+def choose_square(board, current_player):
+    if current_player == 'Player':
+        while True:        
+            valid_choices = [str(num) for num in empty_squares(board)]
+            # prompt(f'Choose a square ({', '.join(valid_choices)}):')
+            prompt(f'Choose a square ({join_or(valid_choices)}):')
+
+
+            square = input().strip()
+            if square in valid_choices:
+                break # break if it's a valid square
+
+            prompt("Sorry, that's not a valid choice.")
+
+        board[int(square)] = HUMAN_MARKER
+
+    elif current_player == 'Computer':
+        if len(empty_squares(board)) == 0:
+            return
+        
+        square = None
+
+        # offense
+        for line in WINNING_LINES:
+            square = find_at_risk_square(line, board, COMPUTER_MARKER)
+            if square:
+                break
+        # defense
+        if not square:
+            for line in WINNING_LINES:
+                square = find_at_risk_square(line, board, HUMAN_MARKER)
+                if square:
+                    break
+
+        # square 5
+        if not square:
+            if board[CENTER_SQUARE] == INITIAL_MARKER:
+                square = CENTER_SQUARE
+        
+        # random
+        if not square:
+            square = random.choice(empty_squares(board))
+        
+        board[square] = COMPUTER_MARKER 
+        
 def player_chooses_square(board):
     # valid square choices are those board keys whose values are spaces
 
@@ -133,6 +182,19 @@ def find_at_risk_square(line, board, marker):
                 return square
     return None
 
+def play_again():
+    prompt("Play again? (y or n)") # returns Boolean
+    answer = input().strip()
+    while answer not in ['y', 'Y', 'n', 'N']:
+        prompt("That's not a valid choice: please enter 'y' or 'n'")
+        answer = input()
+
+    if answer[0].casefold() != 'y':
+        return False
+    
+    
+    return True
+
     
 
 def play_tic_tac_toe():
@@ -140,25 +202,33 @@ def play_tic_tac_toe():
         'Player': 0,
         'Computer': 0
     }
-
-    current_player = 'Player'
     
     while True: # match loop (best of 5)
     
 
         while score['Player'] < GAMES_TO_WIN and score['Computer'] < GAMES_TO_WIN:
 
+            current_player = 'Computer' # sets first player in round
+            
+
             board = initialize_board()
 
             while True:
+                # display_board(board)
+
+                # player_chooses_square(board)
+
+                # if someone_won(board) or board_full(board):
+                #     break
+
+                # computer_chooses_square(board)
+
+                # if someone_won(board) or board_full(board):
+                #     break
+
                 display_board(board)
-
-                player_chooses_square(board)
-
-                if someone_won(board) or board_full(board):
-                    break
-
-                computer_chooses_square(board)
+                choose_square(board, current_player)
+                current_player = alternate_player(current_player)
 
                 if someone_won(board) or board_full(board):
                     break
@@ -178,21 +248,35 @@ def play_tic_tac_toe():
                 break
 
 
-            prompt("Play again? (y or n)") # to play another round in match
-            answer = input().lower()
+            # prompt("Play again? (y or n)") # to play another round in match
+            # answer = input().strip()
+            # while answer not in ['y', 'Y', 'n', 'N']:
+            #     prompt("That's not a valid choice: please enter 'y' or 'n'")
+            #     answer = input()
 
-            if answer[0] != 'y':
-                break
+            # if answer[0] != 'y':
+            #     break
             
+            # prompt('Thank you for playing Tic Tac Toe!')
+
+            if not play_again(): # True to play another round in match
+                break
             prompt('Thank you for playing Tic Tac Toe!')
+
 
         if GAMES_TO_WIN in score.values():
             prompt(f'{max(score)} won the match!')
 
-            prompt("Play another match? (y or n)")
-            answer = input().lower()
+        #     prompt("Play another match? (y or n)")
+        #     answer = input().lower()
+        #     while answer not in ['y', 'Y', 'n', 'N']:
+        #         prompt("That's not a valid choice: please enter 'y' or 'n'")
+        #         answer = input()
 
-            if answer[0] != 'y':
+        #     if answer[0] != 'y':
+        #         break
+
+            if not play_again(): # to play another match
                 break
 
         break
@@ -200,6 +284,12 @@ def play_tic_tac_toe():
     prompt('Thank you for playing Tic Tac Toe!')
 
 play_tic_tac_toe()
+
+# print(play_again())
+
+# print(alternate_player(PLAYERS[0]))
+# print(alternate_player(PLAYERS[1]))
+
 
 # print(find_at_risk_square([1, 2, 3], {
 #     1: COMPUTER_MARKER,

@@ -6,4 +6,5 @@ my_dict = {}
 for target_num in target_numbers:
     my_dict[target_num] = {}
 
-print(my_dict)
+
+
