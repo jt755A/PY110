@@ -11,6 +11,7 @@ DECK = [[suit, value] for suit in SUITS
 GAME_LIMIT = 21
 DEALER_LIMIT = 17
 NUM_CARDS_INITIAL_DEAL = 2
+BEST_OF_5_WINNING_SCORE = 3
 
 game_deck = []
 player_hand = []
